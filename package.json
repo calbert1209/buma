@@ -1,0 +1,12 @@
+{
+  "name": "buma",
+  "version": "1.0.0",
+  "description": "A way to censor videos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "lite-server"
+  },
+  "author": "",
+  "license": "ISC"
+}
