@@ -1,6 +1,8 @@
 import "./app.css";
 import { signal } from "@preact/signals";
-import { MediaPlayer } from "./MediaPlayer";
+import { MarkableMediaPlayer } from "./MarkableMediaPlayer";
+
+
 const objectUrl = signal(null);
 
 export function App() {
@@ -26,8 +28,9 @@ export function App() {
           />
         </label>
       ) : (
-        <MediaPlayer src={objectUrl.value} />
+        <MarkableMediaPlayer src={objectUrl.value} />
       )}
     </div>
   );
 }
+
