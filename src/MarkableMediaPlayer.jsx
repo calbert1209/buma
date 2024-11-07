@@ -87,6 +87,23 @@ const MarkableCanvas = ({ dimensions, onAddRegion, regions }) => {
     currentRegion.value = null;
   };
 
+  const HandleOnMouseOut = (event) => {
+    if (!currentRegion.value) {
+      return;
+    }
+
+    event.preventDefault();
+    const { x, y } = getCanvasRelativePosition(event);
+    const regionW = x - currentRegion.value.x;
+    const regionH = y - currentRegion.value.y;
+    onAddRegion({
+      ...currentRegion.value,
+      width: regionW,
+      height: regionH,
+    });
+    currentRegion.value = null;
+  };
+
   const handleOnMouseMove = (event) => {
     event.preventDefault();
     if (!currentRegion.value) {
@@ -122,6 +139,7 @@ const MarkableCanvas = ({ dimensions, onAddRegion, regions }) => {
       onPointerDown={handleOnMouseDown}
       onPointerUp={handleOnMouseUp}
       onPointerMove={handleOnMouseMove}
+      onPointerOut={HandleOnMouseOut}
       width={dimensions.width}
       height={dimensions.height}
       style={{
