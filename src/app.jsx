@@ -5,6 +5,7 @@ import { useState } from "preact/hooks";
 import { createFfmpegCommand } from "./ffmpeg";
 
 const objectUrl = signal(null);
+const videoMetadata = signal(null);
 
 export function App() {
   const [regions, setRegions] = useState([]);
@@ -17,10 +18,10 @@ export function App() {
     const trueHeight = Math.abs(height);
     const region = {
       id: nextRegionId,
-      x: Math.round(trueX),
-      y: Math.round(trueY),
-      width: Math.round(trueWidth),
-      height: Math.round(trueHeight),
+      x: trueX,
+      y: trueY,
+      width: trueWidth,
+      height: trueHeight,
     };
     setRegions((s) => [...s, region]);
     console.log("region added", region);
@@ -56,7 +57,12 @@ export function App() {
         </label>
       ) : (
         <div>
-          <button onClick={() => alert(createFfmpegCommand('input', 'output', regions))}>test</button>
+          <button onClick={() => alert(createFfmpegCommand({
+            input: 'input.mp4',
+            output: 'output.mp4',
+            regions,
+            metadata: videoMetadata.value
+          }))}>test</button>
           <div style={{ width: "100%", height: "64px", display: "flex", gap:"4px" }}>
             {regions.map((region) => (
               <button
@@ -72,6 +78,7 @@ export function App() {
             src={objectUrl.value}
             onAddRegion={handleOnAddRegion}
             regions={regions}
+            onLoadedMetadata={md => videoMetadata.value = md}
           />
         </div>
       )}

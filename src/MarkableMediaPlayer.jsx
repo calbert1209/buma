@@ -2,22 +2,23 @@ import { signal } from "@preact/signals";
 import { useCallback, useLayoutEffect, useRef } from "preact/hooks";
 import { MediaPlayer } from "./MediaPlayer";
 
-const videoDimensions = signal(null);
+const videoDimensionsOnScreen = signal(null);
 
-export const MarkableMediaPlayer = ({ src, onAddRegion, regions }) => {
+export const MarkableMediaPlayer = ({ src, onAddRegion, regions, onLoadedMetadata }) => {
   const handleOnSetVideoDimensions = useCallback((newDimensions) => {
-    videoDimensions.value = newDimensions;
+    videoDimensionsOnScreen.value = newDimensions;
   }, []);
 
   return (
     <div style={{ position: "relative" }}>
       <MediaPlayer
         src={src}
-        onSetVideoDimensions={handleOnSetVideoDimensions}
+        onResize={handleOnSetVideoDimensions}
+        onLoadedMetadata={onLoadedMetadata}
       />
-      {videoDimensions.value ? (
+      {videoDimensionsOnScreen.value ? (
         <MarkableCanvas
-          dimensions={videoDimensions.value}
+          dimensions={videoDimensionsOnScreen.value}
           onAddRegion={onAddRegion}
           regions={regions}
         />

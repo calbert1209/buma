@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 
-export const MediaPlayer = ({ src, onSetVideoDimensions }) => {
+export const MediaPlayer = ({ src, onResize, onLoadedMetadata }) => {
   const videoRef = useRef();
   const audioRef = useRef();
   const linked = useRef(false);
@@ -28,15 +28,21 @@ export const MediaPlayer = ({ src, onSetVideoDimensions }) => {
     };
 
     videoRef.current.onloadedmetadata = () => {
-      const rect = videoRef.current.getBoundingClientRect();
-      const { width, height } = rect;
-      onSetVideoDimensions({ width, height });
+      const { clientWidth, clientHeight, videoWidth, videoHeight} = videoRef.current
+      onResize({ width: clientWidth, height: clientHeight });
+      onLoadedMetadata({
+        duration: videoRef.current.duration,
+        playbackRate: videoRef.current.playbackRate,
+        clientWidth, 
+        clientHeight,
+        videoWidth,
+        videoHeight
+      });
     };
 
     window.addEventListener("resize", () => {
-      const rect = videoRef.current.getBoundingClientRect();
-      const { width, height } = rect;
-      onSetVideoDimensions({ width, height });
+      const { clientWidth, clientHeight} = videoRef.current
+      onResize({ width: clientWidth, height: clientHeight });
     });
   }, [src]);
 
