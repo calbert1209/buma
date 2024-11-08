@@ -6,15 +6,6 @@ import { useState } from "preact/hooks";
 const objectUrl = signal(null);
 
 export function App() {
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      console.log(url);
-      objectUrl.value = url;
-    }
-  };
-
   const [regions, setRegions] = useState([]);
 
   const handleOnAddRegion = ({ x, y, width, height }) => {
@@ -30,12 +21,25 @@ export function App() {
       width: trueWidth,
       height: trueHeight,
     };
-    setRegions((s) => [
-      ...s,
-      region,
-    ]);
+    setRegions((s) => [...s, region]);
     console.log("region added", region);
   };
+
+  const handleOnRemoveRegion = (regionId) => {
+    console.log("region removed", regionId);
+    setRegions((s) => s.filter((region) => region.id !== regionId));
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setRegions([]);
+      const url = URL.createObjectURL(file);
+      console.log(url);
+      objectUrl.value = url;
+    }
+  };
+
   return (
     <div className="column">
       {!objectUrl.value ? (
@@ -49,11 +53,24 @@ export function App() {
           />
         </label>
       ) : (
-        <MarkableMediaPlayer
-          src={objectUrl.value}
-          onAddRegion={handleOnAddRegion}
-          regions={regions}
-        />
+        <div>
+          <div style={{ width: "100%", height: "64px", display: "flex", gap:"4px" }}>
+            {regions.map((region) => (
+              <button
+                key={region.id}
+                onClick={() => handleOnRemoveRegion(region.id)}
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                {region.id}
+              </button>
+            ))}
+          </div>
+          <MarkableMediaPlayer
+            src={objectUrl.value}
+            onAddRegion={handleOnAddRegion}
+            regions={regions}
+          />
+        </div>
       )}
     </div>
   );

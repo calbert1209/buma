@@ -34,14 +34,15 @@ function getCanvasRelativePosition(event) {
 }
 
 function drawRegions(canvas, regions) {
-  if (!regions.length) return;
-
+  
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     return;
   }
-
+  
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!regions.length) return;
+  
   ctx.fillStyle = "rgba(255, 128, 0, 0.2)";
   
   for (const region of regions) {
@@ -49,6 +50,8 @@ function drawRegions(canvas, regions) {
     if (region.id !== undefined) {
       const previousFillStyle = ctx.fillStyle;
       const previousFont = ctx.font;
+      ctx.fillStyle = "white";
+      ctx.fillRect(region.x + 10, region.y + 4, 24, 24);
       ctx.fillStyle = "black";
       ctx.font = "12px Arial";
       ctx.fillText(region.id, region.x + 20, region.y + 20);
