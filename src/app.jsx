@@ -2,6 +2,7 @@ import "./app.css";
 import { signal } from "@preact/signals";
 import { MarkableMediaPlayer } from "./MarkableMediaPlayer";
 import { useState } from "preact/hooks";
+import { createFfmpegCommand } from "./ffmpeg";
 
 const objectUrl = signal(null);
 
@@ -16,10 +17,10 @@ export function App() {
     const trueHeight = Math.abs(height);
     const region = {
       id: nextRegionId,
-      x: trueX,
-      y: trueY,
-      width: trueWidth,
-      height: trueHeight,
+      x: Math.round(trueX),
+      y: Math.round(trueY),
+      width: Math.round(trueWidth),
+      height: Math.round(trueHeight),
     };
     setRegions((s) => [...s, region]);
     console.log("region added", region);
@@ -33,6 +34,7 @@ export function App() {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      console.log("file changed", file.name);
       setRegions([]);
       const url = URL.createObjectURL(file);
       console.log(url);
@@ -54,12 +56,13 @@ export function App() {
         </label>
       ) : (
         <div>
+          <button onClick={() => alert(createFfmpegCommand('input', 'output', regions))}>test</button>
           <div style={{ width: "100%", height: "64px", display: "flex", gap:"4px" }}>
             {regions.map((region) => (
               <button
                 key={region.id}
                 onClick={() => handleOnRemoveRegion(region.id)}
-                style={{ cursor: 'pointer', userSelect: 'none' }}
+                style={{ cursor: 'pointer', userSelect: 'none', height: '48px', width: '48px' }}
               >
                 {region.id}
               </button>
