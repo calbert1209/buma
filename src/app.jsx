@@ -44,6 +44,12 @@ export function App() {
     }
   };
 
+  const handleOnReset = () => {
+    URL.revokeObjectURL(objectUrl.value);
+    objectUrl.value = null;
+    setRegions([]);
+  };
+
   return (
     <div className="column">
       {!objectUrl.value ? (
@@ -60,7 +66,7 @@ export function App() {
         <div>
           <button
             onClick={() =>
-              alert(
+              console.log(
                 createFfmpegCommand({
                   input: "input.mp4",
                   output: "output.mp4",
@@ -72,6 +78,7 @@ export function App() {
           >
             test
           </button>
+          <button onClick={handleOnReset}>reset</button>
           <RegionManager
             regions={regions}
             onClickRegion={handleOnRemoveRegion}
