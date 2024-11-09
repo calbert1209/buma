@@ -1,15 +1,44 @@
 import "./app.css";
 import { signal } from "@preact/signals";
 import { MarkableMediaPlayer } from "./MarkableMediaPlayer";
-import { useState } from "preact/hooks";
-import { createFfmpegCommand } from "./ffmpeg";
+import { useState, useEffect } from "preact/hooks";
+import { FfmpegWorker } from "./ffmpeg";
 import { RegionManager } from "./RegionManager";
 
 const objectUrl = signal(null);
+const selectedFile = signal(null);
 const videoMetadata = signal(null);
 
 export function App() {
   const [regions, setRegions] = useState([]);
+  const [worker, setWorker] = useState(null);
+  const [progress, setProgress] = useState(-1);
+
+  useEffect(() => {
+    FfmpegWorker.initialize({
+      onProgress: (percent) => setProgress(percent),
+    }).then((worker) => {
+      console.log("worker set", worker);
+      setWorker(worker);
+    });
+  }, []);
+
+  const transcode = async () => {
+    if (!worker) return;
+
+    setProgress(0);
+    worker
+      .transcode({
+        file: selectedFile.value,
+        regions,
+        metadata: videoMetadata.value,
+        blurRadius: 10,
+      })
+      .then((url) => {
+        objectUrl.value = url;
+        setProgress(-1);
+      });
+  };
 
   const handleOnAddRegion = ({ x, y, width, height }) => {
     const nextRegionId = regions.at(-1)?.id + 1 || 0;
@@ -41,6 +70,7 @@ export function App() {
       const url = URL.createObjectURL(file);
       console.log(url);
       objectUrl.value = url;
+      selectedFile.value = file;
     }
   };
 
@@ -64,25 +94,20 @@ export function App() {
         </label>
       ) : (
         <div>
-          <button
-            onClick={() =>
-              console.log(
-                createFfmpegCommand({
-                  input: "input.mp4",
-                  output: "output.mp4",
-                  regions,
-                  metadata: videoMetadata.value,
-                })
-              )
-            }
-          >
-            test
-          </button>
-          <button onClick={handleOnReset}>reset</button>
-          <RegionManager
-            regions={regions}
-            onClickRegion={handleOnRemoveRegion}
-          />
+          {progress >= 0 ? (
+            <progress style={{ width: "100%" }} value={progress} />
+          ) : (
+            <>
+              <button onClick={handleOnReset}>reset</button>
+              <button onClick={transcode} disabled={!worker || !regions.length}>
+                transcode
+              </button>
+              <RegionManager
+                regions={regions}
+                onClickRegion={handleOnRemoveRegion}
+              />
+            </>
+          )}
           <MarkableMediaPlayer
             src={objectUrl.value}
             onAddRegion={handleOnAddRegion}
