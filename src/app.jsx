@@ -3,6 +3,7 @@ import { signal } from "@preact/signals";
 import { MarkableMediaPlayer } from "./MarkableMediaPlayer";
 import { useState } from "preact/hooks";
 import { createFfmpegCommand } from "./ffmpeg";
+import { RegionManager } from "./RegionManager";
 
 const objectUrl = signal(null);
 const videoMetadata = signal(null);
@@ -57,28 +58,29 @@ export function App() {
         </label>
       ) : (
         <div>
-          <button onClick={() => alert(createFfmpegCommand({
-            input: 'input.mp4',
-            output: 'output.mp4',
-            regions,
-            metadata: videoMetadata.value
-          }))}>test</button>
-          <div style={{ width: "100%", height: "64px", display: "flex", gap:"4px" }}>
-            {regions.map((region) => (
-              <button
-                key={region.id}
-                onClick={() => handleOnRemoveRegion(region.id)}
-                style={{ cursor: 'pointer', userSelect: 'none', height: '48px', width: '48px' }}
-              >
-                {region.id}
-              </button>
-            ))}
-          </div>
+          <button
+            onClick={() =>
+              alert(
+                createFfmpegCommand({
+                  input: "input.mp4",
+                  output: "output.mp4",
+                  regions,
+                  metadata: videoMetadata.value,
+                })
+              )
+            }
+          >
+            test
+          </button>
+          <RegionManager
+            regions={regions}
+            onClickRegion={handleOnRemoveRegion}
+          />
           <MarkableMediaPlayer
             src={objectUrl.value}
             onAddRegion={handleOnAddRegion}
             regions={regions}
-            onLoadedMetadata={md => videoMetadata.value = md}
+            onLoadedMetadata={(md) => (videoMetadata.value = md)}
           />
         </div>
       )}
