@@ -28,27 +28,32 @@ export const MediaPlayer = ({ src, onResize, onLoadedMetadata }) => {
     };
 
     videoRef.current.onloadedmetadata = () => {
-      const { clientWidth, clientHeight, videoWidth, videoHeight} = videoRef.current
+      const { clientWidth, clientHeight, videoWidth, videoHeight } =
+        videoRef.current;
       onResize({ width: clientWidth, height: clientHeight });
       onLoadedMetadata({
         duration: videoRef.current.duration,
         playbackRate: videoRef.current.playbackRate,
-        clientWidth, 
+        clientWidth,
         clientHeight,
         videoWidth,
-        videoHeight
+        videoHeight,
       });
     };
 
     window.addEventListener("resize", () => {
-      const { clientWidth, clientHeight} = videoRef.current
+      const { clientWidth, clientHeight } = videoRef.current;
       onResize({ width: clientWidth, height: clientHeight });
     });
   }, [src]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <video ref={videoRef} src={src} style={{ maxHeight: "80vh" }}></video>
+      <video
+        ref={videoRef}
+        src={src}
+        style={{ maxHeight: "80vh", maxWidth: "80vw" }}
+      ></video>
       <audio
         ref={audioRef}
         src={src}

@@ -158,6 +158,7 @@ export class FfmpegWorker {
       blurRadius,
     });
 
+    console.debug("ffmpeg args", args);
     await this.#ffmpeg.exec(args);
 
     return this.#readFile();
