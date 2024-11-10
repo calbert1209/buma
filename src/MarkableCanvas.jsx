@@ -1,5 +1,4 @@
-import { signal } from "@preact/signals";
-import { useLayoutEffect, useRef } from "preact/hooks";
+import { useLayoutEffect, useRef, useState } from "preact/hooks";
 
 function getCanvasRelativePosition(event) {
   const rect = event.target.getBoundingClientRect();
@@ -35,78 +34,69 @@ function drawRegions(canvas, regions) {
   }
 }
 
-const currentRegion = signal(null);
-
 export const MarkableCanvas = ({ dimensions, onAddRegion, regions }) => {
   const canvasRef = useRef();
+  const [currentRegion, setCurrentRegion] = useState(null);
 
   const handleOnMouseDown = (event) => {
     event.preventDefault();
 
     const { x, y } = getCanvasRelativePosition(event);
-    currentRegion.value = { x, y, width: 0, height: 0 };
+    setCurrentRegion({ x, y, width: 0, height: 0 });
   };
 
   const handleOnMouseUp = (event) => {
     event.preventDefault();
-    if (!currentRegion.value) {
+    if (!currentRegion) {
       return;
     }
 
     const { x, y } = getCanvasRelativePosition(event);
-    const regionW = x - currentRegion.value.x;
-    const regionH = y - currentRegion.value.y;
+    const regionW = x - currentRegion.x;
+    const regionH = y - currentRegion.y;
     onAddRegion({
-      ...currentRegion.value,
+      ...currentRegion,
       width: regionW,
       height: regionH,
     });
-    currentRegion.value = null;
+    setCurrentRegion(null);
   };
 
   const HandleOnMouseOut = (event) => {
-    if (!currentRegion.value) {
+    if (!currentRegion) {
       return;
     }
 
     event.preventDefault();
     const { x, y } = getCanvasRelativePosition(event);
-    const regionW = x - currentRegion.value.x;
-    const regionH = y - currentRegion.value.y;
+    const regionW = x - currentRegion.x;
+    const regionH = y - currentRegion.y;
     onAddRegion({
-      ...currentRegion.value,
+      ...currentRegion,
       width: regionW,
       height: regionH,
     });
-    currentRegion.value = null;
+    setCurrentRegion(null);
   };
 
   const handleOnMouseMove = (event) => {
     event.preventDefault();
-    if (!currentRegion.value) {
+    if (!currentRegion) {
       return;
     }
 
     const { x, y } = getCanvasRelativePosition(event);
-    const regionW = x - currentRegion.value.x;
-    const regionH = y - currentRegion.value.y;
-    currentRegion.value = {
-      ...currentRegion.value,
-      width: regionW,
-      height: regionH,
-    };
+    const regionW = x - currentRegion.x;
+    const regionH = y - currentRegion.y;
+    setCurrentRegion((s) => ({ ...s, width: regionW, height: regionH }));
 
-    const nextRegions = currentRegion.value
-      ? [...regions, currentRegion.value]
-      : regions;
+    const nextRegions = currentRegion ? [...regions, currentRegion] : regions;
     drawRegions(canvasRef.current, nextRegions);
   };
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
-    const nextRegions = currentRegion.value
-      ? [...regions, currentRegion.value]
-      : regions;
+    const nextRegions = currentRegion ? [...regions, currentRegion] : regions;
     drawRegions(canvas, nextRegions);
   }, [regions]);
 

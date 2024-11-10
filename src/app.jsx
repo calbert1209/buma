@@ -1,18 +1,16 @@
 import "./app.css";
-import { signal } from "@preact/signals";
 import { MarkableMediaPlayer } from "./MarkableMediaPlayer";
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useCallback } from "preact/hooks";
 import { FfmpegWorker } from "./ffmpeg";
 import { RegionManager } from "./RegionManager";
-
-const objectUrl = signal(null);
-const selectedFile = signal(null);
-const videoMetadata = signal(null);
 
 export function App() {
   const [regions, setRegions] = useState([]);
   const [worker, setWorker] = useState(null);
   const [progress, setProgress] = useState(-1);
+  const [objectUrl, setObjectUrl] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [videoMetadata, setVideoMetadata] = useState(null);
 
   useEffect(() => {
     FfmpegWorker.initialize({
@@ -29,13 +27,13 @@ export function App() {
     setProgress(0);
     worker
       .transcode({
-        file: selectedFile.value,
+        file: selectedFile,
         regions,
-        metadata: videoMetadata.value,
+        metadata: videoMetadata,
         blurRadius: 10,
       })
       .then((url) => {
-        objectUrl.value = url;
+        setObjectUrl(url);
         setProgress(-1);
       });
   };
@@ -65,24 +63,24 @@ export function App() {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      console.log("file changed", file.name);
+      console.debug("file changed", file.name);
       setRegions([]);
       const url = URL.createObjectURL(file);
-      console.log(url);
-      objectUrl.value = url;
-      selectedFile.value = file;
+      console.debug(url);
+      setObjectUrl(url);
+      setSelectedFile(file);
     }
   };
 
   const handleOnReset = () => {
     URL.revokeObjectURL(objectUrl.value);
-    objectUrl.value = null;
+    setObjectUrl(null);
     setRegions([]);
   };
 
   return (
     <div className="column">
-      {!objectUrl.value ? (
+      {!objectUrl ? (
         <label htmlFor="fileInput">
           Choose a video:
           <input
@@ -109,10 +107,10 @@ export function App() {
             </>
           )}
           <MarkableMediaPlayer
-            src={objectUrl.value}
+            src={objectUrl}
             onAddRegion={handleOnAddRegion}
             regions={regions}
-            onLoadedMetadata={(md) => (videoMetadata.value = md)}
+            onLoadedMetadata={setVideoMetadata}
           />
         </div>
       )}

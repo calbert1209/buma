@@ -1,9 +1,6 @@
-import { signal } from "@preact/signals";
-import { useCallback } from "preact/hooks";
+import { useCallback, useState } from "preact/hooks";
 import { MediaPlayer } from "./MediaPlayer";
 import { MarkableCanvas } from "./MarkableCanvas";
-
-const videoDimensionsOnScreen = signal(null);
 
 export const MarkableMediaPlayer = ({
   src,
@@ -11,8 +8,10 @@ export const MarkableMediaPlayer = ({
   regions,
   onLoadedMetadata,
 }) => {
+  const [dimensionsOnScreen, setDimensionsOnScreen] = useState(null);
+
   const handleOnSetVideoDimensions = useCallback((newDimensions) => {
-    videoDimensionsOnScreen.value = newDimensions;
+    setDimensionsOnScreen(newDimensions);
   }, []);
 
   return (
@@ -22,9 +21,9 @@ export const MarkableMediaPlayer = ({
         onResize={handleOnSetVideoDimensions}
         onLoadedMetadata={onLoadedMetadata}
       />
-      {videoDimensionsOnScreen.value ? (
+      {dimensionsOnScreen ? (
         <MarkableCanvas
-          dimensions={videoDimensionsOnScreen.value}
+          dimensions={dimensionsOnScreen}
           onAddRegion={onAddRegion}
           regions={regions}
         />
